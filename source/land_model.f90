@@ -95,6 +95,11 @@ contains
 
         call forchk(bmask_l, 12, 0.0_p, 400.0_p, 273.0_p, stl12)
 
+        ! Correction for model-to-actual topography
+        do month = 1, 12
+            call correct_land_temperature(stl12(:,:,month))
+        end do
+
         ! Snow depth
         do month = 1, 12
             snowd12(:,:,month) = load_boundary_file("snow.nc", "snowd", month)
@@ -238,5 +243,58 @@ contains
 
         ! Full surface temperature at final time
         stl_lm = tanom + stlcl_ob
+    end subroutine
+
+    !> Corrects land-surface temperature from the actual orography to the model
+    !  (spectrally-filtered) orography using a reference lapse rate, and smooths it.
+    !  Sea points are first filled with the land average of each latitude band.
+    subroutine correct_land_temperature(stl)
+        use boundaries, only: phi0, phis0, spectral_truncation
+        use geometry, only: cosg
+        use dynamical_constants, only: gamma
+        use physical_constants, only: grav
+
+        real(p), intent(inout) :: stl(ix,il) !! Land-surface temperature
+
+        real(p) :: stl2(ix,il), gam, sumt, sumw
+        integer :: nl8, nlat1, nlat2, jband, j, jfil, itr, idtr
+
+        nl8 = il/8
+        gam = 0.001*gamma/grav
+
+        ! Reduce to sea level and fill sea points with the land average of
+        ! each latitude band
+        do jband = 1, 8
+            nlat1 = (jband - 1)*nl8 + 1
+            nlat2 = jband*nl8
+
+            sumt = 0.0
+            sumw = 0.0
+            do j = nlat1, nlat2
+                stl(:,j) = stl(:,j) + gam*phi0(:,j)
+                sumt = sumt + cosg(j)*sum(bmask_l(:,j)*stl(:,j))
+                sumw = sumw + cosg(j)*sum(bmask_l(:,j))
+            end do
+
+            sumt = sumt/sumw
+
+            do j = nlat1, nlat2
+                where (bmask_l(:,j) == 0.0) stl(:,j) = sumt
+            end do
+        end do
+
+        ! Smooth the field over sea points with increasing truncation
+        itr = 7
+        idtr = (trunc - 6)/3
+
+        do jfil = 1, 4
+            call spectral_truncation(stl, stl2, itr)
+            where (bmask_l == 0.0) stl = stl2
+            itr = min(itr + idtr, trunc)
+        end do
+
+        ! Final truncation and reduction to model orography
+        call spectral_truncation(stl, stl2, itr)
+        stl = stl2 - gam*phis0
     end subroutine
 end module

@@ -69,7 +69,7 @@ contains
             call rfftf1(ix, fvar, ch, work, ifac)
 
             ! Copy output into spectral field, dividing by no. of long.
-            scale = 1.0/float(ix)
+            scale = 1.0_p/real(ix,p)
 
             ! Mean value (a(0))
             output(1,j) = fvar(1)*scale

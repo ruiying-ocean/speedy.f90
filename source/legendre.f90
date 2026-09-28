@@ -205,11 +205,11 @@ contains
         x = sia_half(j)
 
         do m = 1, mx
-            consq(m) = sqrt(0.5*(2.0*float(m) + 1.0)/float(m ))
+            consq(m) = sqrt(0.5_p*(2.0_p*real(m,p) + 1.0_p)/real(m,p))
         end do
 
         ! start recursion with N=1 (M=L) diagonal
-        alp(1,1) = sqrt(0.5)
+        alp(1,1) = sqrt(0.5_p)
         do m = 2, mx + 1
             alp(m,1) = consq(m-1)*y*alp(m-1,1)
         end do

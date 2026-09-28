@@ -12,7 +12,7 @@ module boundaries
     implicit none
 
     private
-    public initialize_boundaries, fillsf, forchk
+    public initialize_boundaries, fillsf, forchk, spectral_truncation
     public fmask, phi0, phis0, alb0
 
     real(p) :: fmask(ix,il) !! Original (fractional) land-sea mask
@@ -72,21 +72,25 @@ contains
     end subroutine
 
     !> Compute a spectrally-filtered grid-point field.
-    subroutine spectral_truncation(fg1, fg2)
+    subroutine spectral_truncation(fg1, fg2, itr)
         use spectral, only: grid_to_spec, spec_to_grid
 
         real(p), intent(inout) :: fg1(ix,il) !! Original grid-point field
         real(p), intent(inout) :: fg2(ix,il) !! Filtered grid-point field
+        integer, intent(in), optional :: itr !! Triangular truncation (default: model truncation)
 
         complex(p) :: fsp(mx,nx)
-        integer :: n, m, total_wavenumber
+        integer :: n, m, total_wavenumber, ntrunc
+
+        ntrunc = trunc
+        if (present(itr)) ntrunc = itr
 
         fsp = grid_to_spec(fg1)
 
         do n = 1, nx
             do m = 1, mx
                 total_wavenumber = m + n - 2
-                if (total_wavenumber > trunc) fsp(m,n) = (0.0, 0.0)
+                if (total_wavenumber > ntrunc) fsp(m,n) = (0.0, 0.0)
             end do
         end do
 

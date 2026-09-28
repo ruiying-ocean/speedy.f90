@@ -78,7 +78,7 @@ auxiliaries.o          : params.o types.o
 boundaries.o           : physical_constants.o params.o input_output.o spectral.o types.o
 convection.o           : params.o physical_constants.o types.o
 coupler.o              : land_model.o sea_model.o
-date.o                 : types.o
+date.o                 : params.o types.o
 dynamical_constants.o  : types.o
 fourier.o              : params.o geometry.o fftpack.o types.o
 geometry.o             : params.o physical_constants.o types.o
@@ -94,7 +94,7 @@ forcing.o              : dynamical_constants.o shortwave_radiation.o params.o \
 						 surface_fluxes.o date.o sea_model.o longwave_radiation.o humidity.o\
 						 horizontal_diffusion.o types.o
 land_model.o           : params.o date.o interpolation.o input_output.o boundaries.o\
-                         auxiliaries.o types.o
+                         auxiliaries.o dynamical_constants.o geometry.o physical_constants.o types.o
 large_scale_condensation.o : params.o physical_constants.o types.o
 legendre.o             : params.o physical_constants.o geometry.o types.o
 matrix_inversion.o     : types.o

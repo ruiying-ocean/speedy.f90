@@ -36,7 +36,7 @@ subroutine rffti1(n, wa, ifac)
   107 if (nl .ne. 1) go to 104
       ifac(1) = n
       ifac(2) = nf
-      tpi = 8.*atan(1.)
+      tpi = 8.0_p*atan(1.0_p)
       argh = tpi/n
       is = 0
       nfm1 = nf-1
@@ -266,7 +266,7 @@ subroutine radb3(ido, l1, cc, ch, wa1, wa2)
 
     !***FIRST EXECUTABLE STATEMENT  RADB3
       taur = -.5
-      taui = .5*sqrt(3.)
+      taui = 0.5_p*sqrt(3.0_p)
       do 101 k=1,l1
          tr2 = cc(ido,2,k)+cc(ido,2,k)
          cr2 = cc(1,1,k)+taur*tr2
@@ -338,7 +338,7 @@ subroutine radb4(ido, l1, cc, ch, wa1, wa2, wa3)
     integer :: i, k, idp2, ic
 
     !***First executable statement  radb4
-      sqrt2 = sqrt(2.)
+      sqrt2 = sqrt(2.0_p)
       do 101 k=1,l1
          tr1 = cc(1,1,k)-cc(ido,4,k)
          tr2 = cc(1,1,k)+cc(ido,4,k)
@@ -437,7 +437,7 @@ subroutine radb5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
     integer :: i, k, ic, idp2
 
     !***First executable statement  radb5
-      pi = 4.*atan(1.)
+      pi = 4.0_p*atan(1.0_p)
       tr11 = sin(.1*pi)
       ti11 = sin(.4*pi)
       tr12 = -sin(.3*pi)
@@ -558,7 +558,7 @@ subroutine radbg(ido, ip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         & l, lc
 
     !***First executable statement  radbg
-      tpi = 8.*atan(1.)
+      tpi = 8.0_p*atan(1.0_p)
       arg = tpi/ip
       dcp = cos(arg)
       dsp = sin(arg)
@@ -784,7 +784,7 @@ subroutine radf3(ido, l1, cc, ch, wa1, wa2)
 
     !***First executable statement  radf3
       taur = -.5
-      taui = .5*sqrt(3.)
+      taui = 0.5_p*sqrt(3.0_p)
       do 101 k=1,l1
          cr2 = cc(1,k,2)+cc(1,k,3)
          ch(1,1,k) = cc(1,k,1)+cr2
@@ -854,7 +854,7 @@ subroutine radf4(ido, l1, cc, ch, wa1, wa2, wa3)
     integer :: i, k, ic, idp2
 
     !***First executable statement  radf4
-      hsqt2 = .5*sqrt(2.)
+      hsqt2 = 0.5_p*sqrt(2.0_p)
       do 101 k=1,l1
          tr1 = cc(1,k,2)+cc(1,k,4)
          tr2 = cc(1,k,1)+cc(1,k,3)
@@ -949,7 +949,7 @@ subroutine radf5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
     integer :: i, k, idp2, ic
 
     !***First executable statement  radf5
-      pi = 4.*atan(1.)
+      pi = 4.0_p*atan(1.0_p)
       tr11 = sin(.1*pi)
       ti11 = sin(.4*pi)
       tr12 = -sin(.3*pi)
@@ -1065,7 +1065,7 @@ subroutine radfg(ido, ip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         & l, lc
 
     !***First executable statement  radfg
-      tpi = 8.*atan(1.)
+      tpi = 8.0_p*atan(1.0_p)
       arg = tpi/ip
       dcp = cos(arg)
       dsp = sin(arg)

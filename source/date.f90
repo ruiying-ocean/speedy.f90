@@ -52,8 +52,6 @@ module date
 
         !> Initializes model date and calendar.
         subroutine initialize_date
-            use params, only: iseasc
-
             namelist /date/ start_datetime, end_datetime
             integer :: jm
             logical :: namelist_file_exists
@@ -94,20 +92,12 @@ module date
             end do
 
             ! Additional variables to define forcing terms and boundary cond.
-            if (iseasc >= 1) then
-                imont1 = model_datetime%month
-                tmonth = (model_datetime%day-0.5)/float(ndaycal(model_datetime%month,1))
-                tyear  = (ndaycal(model_datetime%month,2)+model_datetime%day-0.5)/float(ncal)
-            else
-                imont1 = start_datetime%month
-                tmonth = 0.5
-                tyear  = (ndaycal(imont1,2) + 0.5*ndaycal(imont1,2))/float(ncal)
-            end if
+            call set_forcing_dates
         end subroutine
 
         !> Updates the current datetime and related date variables.
         subroutine newdate
-            use params, only: iseasc, nsteps
+            use params, only: nsteps
 
             ! Increment minute counter
             model_datetime%minute = model_datetime%minute + int(24*60/nsteps)
@@ -145,14 +135,36 @@ module date
             end if
 
             ! additional variables to define forcing terms and boundary cond.
+            call set_forcing_dates
+        end subroutine
+
+        !> Sets the month and the fractions of month and year elapsed, used to
+        !  define forcing terms and boundary conditions.
+        subroutine set_forcing_dates
+            use params, only: iseasc
+
+            integer :: days_in_month, days_before_month, days_in_year
+
             if (iseasc >= 1) then
                 imont1 = model_datetime%month
-                tmonth = (model_datetime%day-0.5)/float(ndaycal(model_datetime%month,1))
-                tyear  = (ndaycal(model_datetime%month,2)+model_datetime%day-0.5)/float(ncal)
+
+                days_in_month     = ndaycal(imont1,1)
+                days_before_month = ndaycal(imont1,2)
+                days_in_year      = ncal
+
+                ! Leap years (same rule as in newdate)
+                if (mod(model_datetime%year,4) == 0) then
+                    if (imont1 == 2) days_in_month = days_in_month + 1
+                    if (imont1 > 2) days_before_month = days_before_month + 1
+                    days_in_year = days_in_year + 1
+                end if
+
+                tmonth = (model_datetime%day - 0.5)/float(days_in_month)
+                tyear  = (days_before_month + model_datetime%day - 0.5)/float(days_in_year)
             else
                 imont1 = start_datetime%month
                 tmonth = 0.5
-                tyear  = (ndaycal(imont1,2) + 0.5*ndaycal(imont1,2))/float(ncal)
+                tyear  = (ndaycal(imont1,2) + 0.5*ndaycal(imont1,1))/float(ncal)
             end if
         end subroutine
 end module
