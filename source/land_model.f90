@@ -8,8 +8,8 @@ module land_model
     implicit none
 
     private
-    public stl_am, snowd_am, soilw_am
-    public land_model_init, couple_land_atm
+    public stl_am, snowd_am, soilw_am, stl_lm
+    public land_model_init, couple_land_atm, set_land_state
     public fmask_l
     public land_coupling_flag
     public sd2sc
@@ -225,6 +225,15 @@ contains
         ! Always get snow depth and soil water availability from climatology
         snowd_am = snowdcl_ob
         soilw_am = soilwcl_ob
+    end subroutine
+
+    !> Sets the land model state (e.g. from a restart file) and the land-surface
+    !  temperature seen by the atmosphere.
+    subroutine set_land_state(stl)
+        real(p), intent(in) :: stl(ix,il) !! Land-model surface temperature
+
+        stl_lm = stl
+        if (land_coupling_flag == 1) stl_am = stl_lm
     end subroutine
 
     !> Integrates slab land-surface model for one day.

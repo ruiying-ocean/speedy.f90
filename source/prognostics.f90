@@ -27,7 +27,15 @@ contains
     !> Initializes all spectral variables starting from either a reference
     !  atmosphere or a restart file.
     subroutine initialize_prognostics
-        call initialize_from_rest_state
+        use boundaries, only: phis0
+        use spectral, only: grid_to_spec
+
+        ! Compute spectral surface geopotential
+        phis = grid_to_spec(phis0)
+
+        ! When restarting, the prognostic variables are read from the restart
+        ! file once the land and sea models are initialized
+        if (len_trim(restart_file) == 0) call initialize_from_rest_state
     end subroutine
 
     !> Initializes all spectral variables starting from a reference atmosphere.
@@ -47,9 +55,6 @@ contains
         integer :: i, j, k
 
         gam1 = gamma/(1000.0*grav)
-
-        ! 1. Compute spectral surface geopotential
-        phis = grid_to_spec(phis0)
 
         ! 2. Start from reference atmosphere (at rest)
         write (*,'(A)') 'Starting from rest'

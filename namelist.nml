@@ -1,8 +1,17 @@
-! nsteps_out = model variables are output every nsteps_out timesteps
-! nstdia     = model diagnostics are printed every nstdia timesteps
+! nsteps_out      = model variables are output every nsteps_out timesteps
+! nstdia          = model diagnostics are printed every nstdia timesteps
+! nsteps_mean     = period of time-mean surface/flux output (mean_*.nc)
+!                   (< 0: monthly, > 0: every nsteps_mean timesteps, 0: none)
+! nmonths_restart = restart files (restart_*.nc) are written every nmonths_restart
+!                   months, and always at the end of the run (0: only at the end)
+! restart_file    = restart file to start from (its date must equal start_datetime);
+!                   leave empty to start from rest
 &params
-nsteps_out = 1
-nstdia     = 180
+nsteps_out      = 1
+nstdia          = 180
+nsteps_mean     = -1
+nmonths_restart = 0
+restart_file    = ''
 /
 ! start_datetime = the start datetime of the model integration
 ! end_datetime   = the end datetime of the model integration

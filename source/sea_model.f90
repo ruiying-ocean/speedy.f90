@@ -5,9 +5,10 @@ module sea_model
     implicit none
 
     private
-    public sea_model_init, couple_sea_atm
+    public sea_model_init, couple_sea_atm, set_sea_state
     public fmask_s
-    public sstcl_ob, sst_am, sice_am, tice_am, ssti_om
+    public sstcl_ob, sst_am, sice_am, tice_am, ssti_om, sstan_am
+    public sst_om, tice_om, sice_om
     public sea_coupling_flag, sst_anomaly_coupling_flag
 
     ! Constant parameters and fields in sea/ice model
@@ -327,6 +328,25 @@ contains
             end if
         end if
 
+        call set_atm_sea_fields
+    end subroutine
+
+    !> Sets the sea/ice model state (e.g. from a restart file) and the sea-surface
+    !  fields seen by the atmosphere.
+    subroutine set_sea_state(sst, tice, sice)
+        real(p), intent(in) :: sst(ix,il)  !! Ocean model SST
+        real(p), intent(in) :: tice(ix,il) !! Model sea ice temperature
+        real(p), intent(in) :: sice(ix,il) !! Model sea ice fraction
+
+        sst_om  = sst
+        tice_om = tice
+        sice_om = sice
+
+        call set_atm_sea_fields
+    end subroutine
+
+    !> Computes sea-surface anomalies and full fields for the atmospheric model.
+    subroutine set_atm_sea_fields
         ! 3. Compute sea-sfc. anomalies and full fields for atm. model
         ! 3.1 SST
         sstan_am = 0.0

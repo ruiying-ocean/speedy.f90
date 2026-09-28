@@ -4,7 +4,7 @@
 !> until the (continually updated) model datetime (`model_datetime`) equals the
 !> final datetime (`end_datetime`).
 program speedy
-    use params, only: nsteps, delt, nsteps_out, nstrad
+    use params, only: nsteps, delt, nsteps_out, nstrad, nmonths_restart
     use date, only: model_datetime, end_datetime, newdate, datetime_equal
     use shortwave_radiation, only: compute_shortwave
     use input_output, only: output
@@ -14,6 +14,8 @@ program speedy
     use diagnostics, only: check_diagnostics
     use prognostics, only: vor, div, t, ps, tr, phi
     use forcing, only: set_forcing
+    use mean_output, only: update_means
+    use restart, only: write_restart
 
     implicit none
 
@@ -49,7 +51,18 @@ program speedy
         ! Output
         if (mod(model_step-1, nsteps_out) == 0) call output(model_step-1,  vor, div, t, ps, tr, phi)
 
+        ! Time-mean output
+        call update_means(model_step-1)
+
         ! Exchange data with coupler
         call couple_sea_land(1+model_step/nsteps)
+
+        ! Write restart file at the start of selected months and at the end of the run
+        if (datetime_equal(model_datetime, end_datetime)) then
+            call write_restart
+        else if (nmonths_restart > 0 .and. model_datetime%day == 1 .and. &
+            & model_datetime%hour*60 + model_datetime%minute < 24*60/nsteps) then
+            if (mod(model_datetime%month - 1, nmonths_restart) == 0) call write_restart
+        end if
     end do
 end

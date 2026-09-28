@@ -42,7 +42,7 @@ contains
     !  to the dynamical grid-point tendencies
     subroutine get_physical_tendencies(vor, div, t, q, phi, psl, utend, vtend, ttend, qtend)
         use auxiliaries, only: precnv, precls, cbmf, tsr, ssrd, ssr, slrd, slr, olr, slru, ustr, &
-            & vstr, shf, evap, hfluxn
+            & vstr, shf, evap, hfluxn, psg, ts, tskin, u0, v0, t0, rh0, cloudc, clstr, cltop, prtop
         use physical_constants, only: sigh, grdsig, grdscp, cp
         use geometry, only: fsg
         use boundaries, only: phis0
@@ -75,7 +75,6 @@ contains
         real(p), dimension(ix,il) :: pslg, rps, gse
         real(p), dimension(ix,il,kx) :: ug, vg, tg, qg, phig, utend_dyn, vtend_dyn, ttend_dyn, qtend_dyn
         real(p), dimension(ix,il,kx) :: se, rh, qsat
-        real(p), dimension(ix,il) :: psg, ts, tskin, u0, v0, t0, cloudc, clstr, cltop, prtop
         real(p), dimension(ix,il,kx) :: tt_cnv, qt_cnv, tt_lsc, qt_lsc, tt_rlw, ut_pbl, vt_pbl,&
             & tt_pbl, qt_pbl
 
@@ -120,6 +119,8 @@ contains
         do k = 1, kx
             call spec_hum_to_rel_hum(tg(:,:,k), psg, fsg(k), qg(:,:,k), rh(:,:,k), qsat(:,:,k))
         end do
+
+        rh0 = rh(:,:,kx)
 
         ! =========================================================================
         ! Precipitation

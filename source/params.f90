@@ -9,6 +9,7 @@ module params
     private
     public trunc, ix, iy, il, kx, nx, mx, ntr
     public nsteps, nstdia, nsteps_out, iseasc, nstrad, sppt_on, issty0, delt, rob, wil, alph
+    public nsteps_mean, restart_file, nmonths_restart
     public initialize_params
 
     ! =========================================================================
@@ -48,16 +49,24 @@ module params
 
     integer :: nstdia     !! Period (number of steps) for diagnostic print-out
     integer :: nsteps_out !! Number of time steps between outputs
+    integer :: nsteps_mean     !! Averaging period for time-mean output
+                               !! (< 0: monthly, > 0: number of time steps, 0: no output)
+    character(len=256) :: restart_file !! Restart file to start from (empty: start from rest)
+    integer :: nmonths_restart !! Period (number of months) for writing restart files
+                               !! (0: only at the end of the run)
 
 contains
     !> Initializes user-defined parameters from namelist file.
     subroutine initialize_params
-        namelist /params/ nsteps_out, nstdia
+        namelist /params/ nsteps_out, nstdia, nsteps_mean, restart_file, nmonths_restart
         logical :: namelist_file_exists
 
         ! Set default values
         nsteps_out = 1
         nstdia = 36*5
+        nsteps_mean = -1
+        restart_file = ''
+        nmonths_restart = 0
 
         ! Read namelist file, if it exists
         inquire(file="namelist.nml", exist=namelist_file_exists)
@@ -70,5 +79,8 @@ contains
         ! Print values to screen
         write (*,'(A,I5)') 'nsteps_out (frequency of output)  = ', nsteps_out
         write (*,'(A,I5)') 'nstdia (frequency of diagnostics) = ', nstdia
+        write (*,'(A,I5)') 'nsteps_mean (time-mean period)    = ', nsteps_mean
+        write (*,'(A,I5)') 'nmonths_restart (restart period)  = ', nmonths_restart
+        if (len_trim(restart_file) > 0) write (*,'(A,A)') 'restart_file = ', trim(restart_file)
     end subroutine
 end module

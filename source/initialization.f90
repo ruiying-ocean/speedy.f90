@@ -10,7 +10,7 @@ module initialization
 contains
     !> Initializes everything.
     subroutine initialize
-        use params, only: issty0, initialize_params
+        use params, only: issty0, initialize_params, restart_file
         use date, only: isst0, initialize_date, start_datetime
         use coupler, only: initialize_coupler
         use sea_model, only: sea_coupling_flag, sst_anomaly_coupling_flag
@@ -24,6 +24,7 @@ contains
         use boundaries, only: initialize_boundaries
         use prognostics, only: initialize_prognostics
         use forcing, only: set_forcing
+        use restart, only: read_restart
 
         call print_speedy_title
 
@@ -69,6 +70,9 @@ contains
         ! =========================================================================
 
         call initialize_coupler
+
+        ! Read atmospheric, land and sea states from restart file
+        if (len_trim(restart_file) > 0) call read_restart
 
         ! =========================================================================
         ! Initialization of first time step

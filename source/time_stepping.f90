@@ -12,13 +12,16 @@ contains
     subroutine first_step
         use implicit, only: initialize_implicit
 
-        call initialize_implicit(0.5*delt)
+        ! When restarting, both time levels are read from the restart file
+        if (len_trim(restart_file) == 0) then
+            call initialize_implicit(0.5*delt)
 
-        call step(1, 1, 0.5*delt)
+            call step(1, 1, 0.5*delt)
 
-        call initialize_implicit(delt)
+            call initialize_implicit(delt)
 
-        call step(1, 2, delt)
+            call step(1, 2, delt)
+        end if
 
         call initialize_implicit(2*delt)
     end

@@ -44,6 +44,7 @@ FILES= \
 	   legendre.o \
 	   longwave_radiation.o \
 	   matrix_inversion.o \
+	   mean_output.o \
 	   input_output.o \
 	   interpolation.o \
 	   mod_radcon.o \
@@ -51,6 +52,7 @@ FILES= \
 	   physics.o \
 	   physical_constants.o \
 	   prognostics.o \
+	   restart.o \
 	   sea_model.o \
 	   shortwave_radiation.o \
 	   spectral.o \
@@ -73,7 +75,7 @@ clean:
 	rm -f *.o *.mod
 
 speedy.o               : params.o date.o input_output.o shortwave_radiation.o time_stepping.o\
-                         diagnostics.o
+                         diagnostics.o mean_output.o restart.o
 auxiliaries.o          : params.o types.o
 boundaries.o           : physical_constants.o params.o input_output.o spectral.o types.o
 convection.o           : params.o physical_constants.o types.o
@@ -88,7 +90,8 @@ humidity.o             : params.o types.o
 implicit.o             : params.o dynamical_constants.o physical_constants.o geometry.o\
                          horizontal_diffusion.o matrix_inversion.o types.o
 initialization.o       : coupler.o params.o date.o input_output.o time_stepping.o boundaries.o\
-                         spectral.o sea_model.o physics.o geopotential.o prognostics.o forcing.o
+                         spectral.o sea_model.o physics.o geopotential.o prognostics.o forcing.o\
+                         restart.o
 forcing.o              : dynamical_constants.o shortwave_radiation.o params.o \
                          physical_constants.o boundaries.o date.o land_model.o mod_radcon.o\
 						 surface_fluxes.o date.o sea_model.o longwave_radiation.o humidity.o\
@@ -98,6 +101,8 @@ land_model.o           : params.o date.o interpolation.o input_output.o boundari
 large_scale_condensation.o : params.o physical_constants.o types.o
 legendre.o             : params.o physical_constants.o geometry.o types.o
 matrix_inversion.o     : types.o
+mean_output.o          : params.o input_output.o date.o auxiliaries.o land_model.o sea_model.o\
+                         mod_radcon.o boundaries.o physical_constants.o geometry.o types.o
 diagnostics.o          : params.o spectral.o types.o
 prognostics.o          : params.o dynamical_constants.o physical_constants.o geometry.o\
                          boundaries.o diagnostics.o spectral.o input_output.o types.o
@@ -106,6 +111,8 @@ interpolation.o        : params.o date.o types.o
 physical_constants.o   : params.o types.o
 mod_radcon.o           : params.o types.o
 params.o               : types.o
+restart.o              : params.o input_output.o date.o prognostics.o land_model.o sea_model.o\
+                         types.o
 physics.o              : params.o coupler.o physical_constants.o boundaries.o land_model.o\
                          sea_model.o sppt.o convection.o large_scale_condensation.o surface_fluxes.o\
                          vertical_diffusion.o shortwave_radiation.o longwave_radiation.o humidity.o\

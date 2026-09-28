@@ -9,7 +9,7 @@ module input_output
     implicit none
 
     private
-    public output, load_boundary_file
+    public output, load_boundary_file, check
 
     !> Interface for reading boundary files.
     interface load_boundary_file
