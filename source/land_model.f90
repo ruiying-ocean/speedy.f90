@@ -177,7 +177,9 @@ contains
             end do
         end do
 
-        cdland(:,:) = dmask(:,:)*tdland/(1.+dmask(:,:)*tdland)
+        ! The land model is called every time step, so express the dissipation
+        ! time (in days) in time steps
+        cdland(:,:) = dmask(:,:)*tdland*nsteps/(1.+dmask(:,:)*tdland*nsteps)
     end subroutine
 
     !> Exchanges fluxes between land and atmosphere.

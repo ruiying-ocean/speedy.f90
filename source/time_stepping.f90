@@ -80,9 +80,10 @@ contains
             divdt(1,n,1) = divdt(1,n,1) - sdrag*div(1,n,1,1)
         end do
 
-        vordt = do_horizontal_diffusion(vor(:,:,:,1),  vordt, dmps, dmp1s)
-        divdt = do_horizontal_diffusion(div(:,:,:,1),  divdt, dmps, dmp1s)
-        tdt   = do_horizontal_diffusion(ctmp, tdt,   dmps, dmp1s)
+        ! Stratospheric diffusion is applied to the top level only
+        vordt(:,:,1) = do_horizontal_diffusion(vor(:,:,1,1), vordt(:,:,1), dmps, dmp1s)
+        divdt(:,:,1) = do_horizontal_diffusion(div(:,:,1,1), divdt(:,:,1), dmps, dmp1s)
+        tdt(:,:,1)   = do_horizontal_diffusion(ctmp(:,:,1),  tdt(:,:,1),   dmps, dmp1s)
 
         ! Diffusion of tracers
         do k = 1, kx
@@ -97,7 +98,7 @@ contains
 
         if (ntr > 1) then
             do itr = 2, ntr
-                trdt(:,:,:,1) = do_horizontal_diffusion(tr(:,:,:,1,itr), trdt(:,:,:,itr), dmp, dmp1)
+                trdt(:,:,:,itr) = do_horizontal_diffusion(tr(:,:,:,1,itr), trdt(:,:,:,itr), dmp, dmp1)
             enddo
         endif
 

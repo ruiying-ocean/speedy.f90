@@ -30,6 +30,7 @@ module surface_fluxes
     real(p) :: dtheta = 3.0   !! Potential temp. gradient for stability correction
     real(p) :: fstab = 0.67   !! Amplitude of stability correction (fraction)
     real(p) :: hdrag = 2000.0 !! Height scale for orographic correction
+    real(p) :: fhdrag = 0.5   !! Max. amplitude of orographic correction (fraction)
     real(p) :: clambda = 7.0  !! Heat conductivity in skin-to-root soil layer
     real(p) :: clambsn = 7.0  !! Heat conductivity in soil for snow cover = 1
 
@@ -275,7 +276,7 @@ contains
         ! 4.5 Emission of lw radiation from the surface
         !     and net heat fluxes into sea surface
         slru(:,:,2) = esbc*tsea**4.0
-        hfluxn(:,:,2) = ssrd*(1.0 - alb_s) + slrd - slru(:,:,2) + shf(:,:,2) + alhc*evap(:,:,2)
+        hfluxn(:,:,2) = ssrd*(1.0 - alb_s) + slrd - (slru(:,:,2) + shf(:,:,2) + alhc*evap(:,:,2))
 
         ! =========================================================================
         ! Weighted average of surface fluxes and temperatures according to land-sea
@@ -305,6 +306,6 @@ contains
 
         rhdrag = 1.0/(grav*hdrag)
 
-        forog = 1.0 + rhdrag*(1.0 - exp(-max(phi0, 0.0)*rhdrag))
+        forog = 1.0 + fhdrag*(1.0 - exp(-max(phi0, 0.0)*rhdrag))
     end
 end module

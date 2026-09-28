@@ -63,9 +63,9 @@ contains
 
         ! Latitudes and functions of latitude
         ! NB: J=1 is Southernmost point!
+        sia_half = get_gaussian_latitudes()
         do j = 1, iy
             jj = il + 1 - j
-            sia_half(j) = cos(3.141592654*(j - 0.25)/(il + 0.5))
             coa_half(j) = sqrt(1.0 - sia_half(j)**2.0)
             sia(j)  = -sia_half(j)
             sia(jj) =  sia_half(j)
@@ -88,4 +88,37 @@ contains
 
         coriol = 2.0*omega*sia
     end subroutine
+
+    !> Compute sine of the Gaussian latitudes (the roots of the Legendre polynomial
+    !  of degree il) over one hemisphere, from the pole to the equator. Uses the same
+    !  Newton iteration as the Gaussian weights in the legendre module.
+    function get_gaussian_latitudes() result(z_out)
+        real(p) :: z_out(iy)
+
+        real(p) :: z, z1, p1, p2, p3, pp
+        integer :: i, j
+
+        z1 = 2.0_p
+
+        do i = 1, iy
+            z = cos(3.141592654_p*(real(i,p) - 0.25_p)/(real(il,p) + 0.5_p))
+
+            do while (abs(z - z1) > epsilon(real(1.0,p)))
+                p1 = 1.0_p
+                p2 = 0.0_p
+
+                do j = 1, il
+                    p3 = p2
+                    p2 = p1
+                    p1 = ((2.0_p*real(j,p) - 1.0_p)*z*p2 - (real(j,p) - 1.0_p)*p3)/j
+                end do
+
+                pp = real(il,p)*(z*p1 - p2)/(z**2.0_p - 1.0_p)
+                z1 = z
+                z = z1 - p1/pp
+            end do
+
+            z_out(i) = z
+        end do
+    end function
 end module

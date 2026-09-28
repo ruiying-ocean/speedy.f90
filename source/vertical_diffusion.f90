@@ -97,7 +97,7 @@ contains
                         qtenvd(i,j,nl1) =  fluxq*rsig(nl1)
                         qtenvd(i,j,kx)  = -fluxq*rsig(kx)
                     end if
-                else if (drh > drh0) then
+                else if (drh >= drh0) then
                     fluxq           =  fvdiq2*qsat(i,j,nl1)*drh
                     qtenvd(i,j,nl1) =  fluxq*rsig(nl1)
                     qtenvd(i,j,kx)  = -fluxq*rsig(kx)

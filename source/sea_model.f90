@@ -171,11 +171,10 @@ contains
         ! SST anomalies for initial and preceding/following months
         if (sst_anomaly_coupling_flag > 0) then
             write (*,'(A,I0.2)') 'SST anomalies are read starting from month ', isst0
+            ! If isst0 = 1, the preceding month is set equal to the initial month
             do month = 1, 3
-                if ((isst0 <= 1 .and. month /= 2) .or. isst0 > 1) then
-                    sstan3(:,:,month) = load_boundary_file("sea_surface_temperature_anomaly.nc", &
-                        & "ssta", isst0-2+month, 420)
-                end if
+                sstan3(:,:,month) = load_boundary_file("sea_surface_temperature_anomaly.nc", &
+                    & "ssta", max(isst0-2+month, 1), 420)
             end do
 
             call forchk(bmask_s, 3, -50.0_p, 50.0_p, 0.0_p, sstan3)
@@ -246,8 +245,10 @@ contains
             rhcapi(:,j) = delt/hcapi(j)
         end do
 
-        cdsea = dmask*tdsst/(1.+dmask*tdsst)
-        cdice = dmask*tdice/(1.+dmask*tdice)
+        ! The sea model is called every time step, so express the dissipation
+        ! times (in days) in time steps
+        cdsea = dmask*tdsst*nsteps/(1.+dmask*tdsst*nsteps)
+        cdice = dmask*tdice*nsteps/(1.+dmask*tdice*nsteps)
     end
 
     subroutine couple_sea_atm(day)
@@ -270,7 +271,9 @@ contains
 
         ! SST anomaly
         if (sst_anomaly_coupling_flag.gt.0) then
-            if (model_datetime%day.eq.1.and.day.gt.0) call obs_ssta
+            ! Update once per month, on the first time step of the month
+            if (model_datetime%day == 1 .and. day > 0 .and. &
+                & model_datetime%hour*60 + model_datetime%minute < 24*60/nsteps) call obs_ssta
             call forint (2,sstan3,sstan_ob)
         end if
 
@@ -364,7 +367,7 @@ contains
 
     ! Update observed SST anomaly array
     subroutine obs_ssta
-        use date, only: model_datetime, start_datetime
+        use date, only: model_datetime
         use input_output, only: load_boundary_file
         use boundaries, only: forchk
 
@@ -373,12 +376,16 @@ contains
         sstan3(:,:,1) = sstan3(:,:,2)
         sstan3(:,:,2) = sstan3(:,:,3)
 
-        ! Compute next month given initial SST year
-        next_month = (start_datetime%year - issty0) * 12 + model_datetime%month
+        ! Compute record of the month following the current month
+        next_month = (model_datetime%year - issty0) * 12 + model_datetime%month + 1
 
-        ! Read next month SST anomalies
-        sstan3(:,:,3) = load_boundary_file("sea_surface_temperature_anomaly.nc", "ssta", &
-            & next_month, 420)
+        ! Read next month SST anomalies (keep the anomaly constant beyond the end of the file)
+        if (next_month > 420) then
+            print *, 'WARNING: end of SST anomaly file reached, SST anomaly will be kept constant'
+        else
+            sstan3(:,:,3) = load_boundary_file("sea_surface_temperature_anomaly.nc", "ssta", &
+                & next_month, 420)
+        end if
 
         call forchk(bmask_s, 1, -50.0_p, 50.0_p, 0.0_p, sstan3(:,:,3))
     end
@@ -429,8 +436,9 @@ contains
         tanom = tice_om - ticecl_ob
 
         ! Definition of non-linear damping coefficient
+        ! (the daily factor is spread over the nsteps calls per day)
         anom0     = 20.
-        cdis = cdice*(anom0/(anom0+abs(tanom)))
+        cdis = cdice*(anom0/(anom0+abs(tanom)))**(1.0/nsteps)
         !cdis(:,:) = cdice(:,:)
 
         ! Time evolution of temp. anomaly
